@@ -7,6 +7,7 @@ Adam Dinan (ad866@cam.ac.uk / adam1989ie@gmail.com).
 November 2017.
 
 Outline:
+  - Quality assessment of reads.
   - Trim reads.
   - Map sequentially to rRNA; vRNA; mRNA; ncRNA; host genome.
   - Plot the read mapping statistics.

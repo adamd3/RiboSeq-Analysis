@@ -13,5 +13,5 @@ Overview of pipeline:
   - Map sequentially to rRNA; vRNA; mRNA; ncRNA; host genome.
   - Plot the read mapping statistics.
   - Calculate the length distribution of virus and mRNA-mapping reads + plot.
-  - Calculate framing of reads on host mRNA transcripts + plot.
+  - Calculate framing of reads on virus and host mRNA transcripts + plot.
   - Assess contamination of samples by ribonucleoproteins (RNPs).

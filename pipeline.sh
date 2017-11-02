@@ -193,3 +193,87 @@ do
     --genomeDir $stardbdir/$hostname
 done
 
+
+#------------------------------------------------------------------------------
+
+#Mapping summary plots
+
+rm -f readcounts.summary
+
+for line in $(awk '{printf "%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5}' libraries.txt)
+do
+    library=$(echo $line | awk -F: '{print $1}')
+    virus=$(echo $line | awk -F: '{print $2}')
+    hostname=$(echo $line | awk -F: '{print $3}')
+    condition=$(echo $line | awk -F: '{print $4}')
+    libtype=$(echo $line | awk -F: '{print $5}')
+    description="$library-$condition-$libtype"
+    total=$(grep "Input:" ./$library.log.txt | head -1 | awk '{print $2}')
+    tooshort=$(grep "too-short" ./$library.log.txt | head -1 | awk '{print $2}')
+    adapters=$(grep "adapter-only" ./$library.log.txt | head -1 | awk '{print $2}')
+    nonclipped=$(grep "non-clipped" ./$library.log.txt | head -1 | awk '{print $2}')
+    echo -n "$description $total $tooshort $adapters $nonclipped " >> readcounts.summary
+    for dbline in $(echo $dbdatacol1) #everything except gDNA
+    do
+        db=$(echo $dbline | awk -F: '{print $1}')
+        fwdcounts=$(awk '{print $3}' $library.$db.bowtie | grep "+" | wc -l | awk '{print $1}')
+        revcounts=$(awk '{print $3}' $library.$db.bowtie | grep "-" | wc -l | awk '{print $1}')
+        echo -n "$db $fwdcounts $revcounts " >> readcounts.summary
+    done
+    for dbline in $(echo $dbdatacol2) #gDNA
+    do
+        db=$(echo $dbline | awk -F: '{print $1}')
+        totalcounts=$(samtools view -F 4 -c $library.Aligned.sortedByCoord.out.bam | awk '{print $1}')
+        echo -n "$db $totalcounts 0" >> readcounts.summary #NOTE: inserting 0 for reverse-strand count, since it doesn't make sense to distiguish strands for gDNA
+    done
+    echo >> readcounts.summary
+done
+
+ndb1=$(echo $dbdatacol1 | wc | awk '{print $2}')
+ndb2=$(echo $dbdatacol2 | wc | awk '{print $2}')
+ndb=$((ndb1+ndb2))
+cat $templatedir/readcounts_summary.R | sed 's/ggg/'virus'/' | sed 's/nnn/'$ndb'/' > readcounts.summary.R
+fwdcol=7 #forward mapping reads are specified in the 4th column of readcounts file
+revcol=8
+count=0
+for dbline in $(echo $dbdatacol1)
+do
+    db=$(echo $dbline | awk -F: '{print $1}')
+    col=$(echo $dbline | awk -F: '{print $2}')
+    cat $templatedir/readcounts_2.R | sed 's/ddd/'$db'/' | \
+        sed 's/aaa/'$fwdcol'/' | sed 's/bbb/'$revcol'/' | \
+        sed 's/ccc/'$col'/' | sed 's/xxx/'$count'/g' >> readcounts.summary.R
+    fwdcol=$((fwdcol+3))
+    revcol=$((revcol+3))
+    count=$((count+1))
+done
+for dbline in $(echo $dbdatacol2)
+do
+    db=$(echo $dbline | awk -F: '{print $1}')
+    col=$(echo $dbline | awk -F: '{print $2}')
+    cat $templatedir/readcounts_2.R | sed 's/ddd/'$db'/' | \
+        sed 's/aaa/'$fwdcol'/' | sed 's/bbb/'$revcol'/' | \
+        sed 's/ccc/'$col'/' | sed 's/xxx/'$count'/g' >> readcounts.summary.R
+    fwdcol=$((fwdcol+3))
+    revcol=$((revcol+3))
+    count=$((count+1))
+done
+
+# make R plots
+echo "dev.off()" >> readcounts.summary.R
+sed 's/^.*://' readcounts.summary > readcounts.summary_pl
+R --no-save --slave < readcounts.summary.R #argument --slave makes R run as 'quietly' as possible.
+
+
+#-----------------------------------------------------------------------
+
+# sort + count unmapped reads
+
+for line in $(awk '{printf "%s:%s\n", $1,$2}' libraries.txt)
+do
+    library=$(echo $line | awk -F: '{print $1}')
+    hostname=$(echo $line | awk -F: '{print $2}')
+    awk '{if (NR%4==2) print $0}' $library.Unmapped.out.mate1 \
+      | sort | uniq -c | sort -nr > $library.unmapped.counted
+done
+

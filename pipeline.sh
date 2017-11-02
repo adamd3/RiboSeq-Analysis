@@ -188,6 +188,7 @@ do
     --outFilterMismatchNmax 2  \
     --outFilterIntronMotifs RemoveNoncanonicalUnannotated \
     --outMultimapperOrder Random --outSAMmultNmax 1 --genomeLoad LoadAndKeep \
+    --limitBAMsortRAM 60000000000 \
     --readFilesIn $library.nonncRNA.fq \
     --genomeDir $stardbdir/$hostname
 done

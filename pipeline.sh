@@ -127,7 +127,7 @@ do
     libtype=$(echo $line | awk -F: '{print $5}')
     echo "vRNA" >> $library.log.txt
     bowtie -p 8 -v 2 --best --un $library.nonvRNA.fq \
-       $databasedir/$virus/$virus.fragments.combined \
+       $databasedir/$virus/$virus \
        -q $library.nonrRNA.fq \
         > $library.vRNA.bowtie 2>> $library.log.txt
     echo >> $library.log.txt

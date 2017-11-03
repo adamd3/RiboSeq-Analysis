@@ -3,12 +3,10 @@
 # Set parameters:
 
 # Directories
-datadir="/mnt/sdb1/RibosomeProfiling/RAWDATA"
-databasedir="/mnt/sdb1/RibosomeProfiling/DATABASES"
-stardbdir="/mnt/sdb1/RibosomeProfiling/STAR_DATABASES"
-scriptsdir="/home/adinan/Annotated_scripts/"
-plotsdir="/home/adinan/PlotScripts_AD/"
-templatedir="/mnt/sdb1/RibosomeProfiling/TEMPLATES"
+databasedir="X" # directory containing bowtie databases
+stardbdir="X" # directory containing STAR databases
+scriptsdir="X" # directory containing analysis scripts (python scripts, etc.)
+plotsdir="X" # directory containing plot scripts (R scripts)
 
 # Database names
 databases1="rRNA:rRNA/rRNA"

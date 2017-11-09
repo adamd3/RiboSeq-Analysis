@@ -1,4 +1,4 @@
-// Programming for making running mean.
+// Programme for making running mean.
 // Input should be a single column of numbers.
 // Command line input: file name, halfwindow size n (window is 2n + 1).
 

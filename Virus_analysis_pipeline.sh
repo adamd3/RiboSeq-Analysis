@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # NOTE:
-# run this script from within the directory where you performed the
-# basic RiboSeq analysis pipeline (i.e. where your vRNA.bowtie files are located)
+# run this pipeline from within the directory where you performed the
+# basic RiboSeq analysis (i.e. where your vRNA.bowtie files are located)
+
+# The slidingwindow.cpp script must be compiled before running this pipeline; 
+# e.g. using the GNU compiler: g++ slidingwindow.cpp -o slidingwindow
 
 # Most of the R scripts are given in the Plots directory.
 # However, you need to make "head" R files for the virus that contains

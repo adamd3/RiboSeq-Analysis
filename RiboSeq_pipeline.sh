@@ -1,30 +1,7 @@
 #!/bin/bash
-
-# Set parameters:
+source parameters.tsv
 
 workingdir=$(pwd)
-
-# Directories
-databasedir="X" # directory containing bowtie databases
-stardbdir="X" # directory containing STAR databases
-scriptsdir="X" # directory containing analysis scripts (python scripts, etc.)
-plotsdir="X" # directory containing plot scripts (R scripts)
-
-# Database names
-databases1="rRNA:rRNA/rRNA"
-databases2="mRNA:mRNA/mRNA ncRNA2:ncRNA_other/ncRNA_other gDNA:genome/genome"
-
-# colours used for R plots:
-dbdatacol1="rRNA:616 vRNA:552 mRNA:494 ncRNA_other:78"
-#blue, red, light green, brown
-dbdatacol2="gDNA:142"
-#yellow
-
-# Adaptor sequence to be trimmed from reads + min length of trimmed reads
-adaptor="TGGAATTCTCGGGTGCCAAGGAACTCCAGTCA"
-trimlen=25
-export adaptor
-export trimlen
 
 #-----------------------------------------------------------------------
 
@@ -47,8 +24,15 @@ done
 #-------------------------------------------------------------------------------
 
 # trim reads in parallel
+for file in *.fq
+do
+    x=$(echo $file | sed 's/.fq/.trimmed.fq/');
+    log=$(echo $file | sed 's/.fq/.log.txt/');
+    fastx_clipper -Q33 -l "$trimlen" -a "$adaptor" -c -n -v -i $file > $x 2>>$log;
+done
+    
 parallel 'fastx_clipper -Q33 -l "$trimlen" -a "$adaptor" -c -n \
-    -v -i {} > {.}.trimmed.fq 2>> {.}.log.txt' ::: *.fq
+    	 -v -i {} > {.}.trimmed.fq 2>> {.}.log.txt' ::: *.fq
 
 #The read names line in trimmed fastq files (e.g.
 #  "@M00964:54:000000000-A3D68:1:1101:16462:1518 1:N:0:1") should contain two

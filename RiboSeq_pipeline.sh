@@ -1,6 +1,5 @@
 #!/bin/bash
 source parameters.tsv
-
 workingdir=$(pwd)
 
 #-----------------------------------------------------------------------
@@ -77,15 +76,25 @@ do
   fi
 done
 
+
+# remove PCR duplicates and clip random kmers of length nclip
+# only use if random kmers are appended to your reads
+
 if [ $dedup == 1 ]; then
    for line in $(awk '{printf "%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5}' libraries.txt)
    do
        library=$(echo $line | awk -F: '{print $1}');
-       cat $library.trimmed.fq | paste - - - -  | awk '!_[$2]++' | tr '\t' '\n' > $library.uniq.fq;
-   done  
+       cat $library.trimmed.fq | paste - - - -  | awk -F "\t" '!_[$2]++' | tr '\t' '\n' > $library.uniq.fq;
+       awk 'NR % 4 == 2' $library.trimmed.fq | sort | uniq -c | sort -n -r > $library.dupcounts.tsv;
+       awk '{print $1}' $library.dupcounts.tsv | sort | uniq -c > $library.totaldups.tsv;
+       awk '{x=x+$1}; {y=y+1}; END {printf("duplicates\t%s\n", x-y)}' $library.dupcounts.tsv >> $library.log.txt;
+       seqtk trimfq -b $nclip -e $nclip $library.uniq.fq > $library.tagclip.fq;
+       suffix=tagclip.fq;
+   done
+else
+    suffix=trimmed.fq;
 fi
 
-zcat SRR513201_dusted.fastq.gz | paste - - - -  | awk '!_[$2]++' | tr '\t' '\n'
 #-----------------------------------------------------------------------
 
 # map to ribosomal RNA
@@ -100,7 +109,7 @@ do
     echo "rRNA" >> $library.log.txt
     bowtie -p 8 -v 2 --best --un $library.nonrRNA.fq \
        $databasedir/$hostname/rRNA/rRNA \
-       -q ./$library.trimmed.fq \
+       -q ./$library.$suffix \
         > $library.rRNA.bowtie 2>> $library.log.txt
     echo >> $library.log.txt
 done
@@ -257,6 +266,11 @@ do
     libtype=$(echo $line | awk -F: '{print $5}')
     description="$library-$condition-$libtype"
     total=$(grep "Input:" ./$library.log.txt | head -1 | awk '{print $2}')
+    if [ dedup == 1 ]; then
+	duplicates=$(grep "duplicates" ./$library.log.txt | head -1 | awk '{print $2}')
+    else
+	duplicates=NA
+    fi
     tooshort=$(grep "too-short" ./$library.log.txt | head -1 | awk '{print $2}')
     adapters=$(grep "adapter-only" ./$library.log.txt | head -1 | awk '{print $2}')
     nonclipped=$(grep "non-clipped" ./$library.log.txt | head -1 | awk '{print $2}')

@@ -87,10 +87,12 @@ if [ $dedup == 1 ]; then
        cat $library.trimmed.fq | paste - - - -  | awk -F "\t" '!_[$2]++' | tr '\t' '\n' > $library.uniq.fq;
        awk 'NR % 4 == 2' $library.trimmed.fq | sort | uniq -c | sort -n -r > $library.dupcounts.tsv;
        awk '{print $1}' $library.dupcounts.tsv | sort | uniq -c > $library.totaldups.tsv;
+       Rscript $plotdir/plotDuplicates.R $library.totaldups.tsv $library.duplicates.jpg;
        awk '{x=x+$1}; {y=y+1}; END {printf("duplicates\t%s\n", x-y)}' $library.dupcounts.tsv >> $library.log.txt;
        seqtk trimfq -b $nclip -e $nclip $library.uniq.fq > $library.tagclip.fq;
        suffix=tagclip.fq;
    done
+
 else
     suffix=trimmed.fq;
 fi
@@ -133,6 +135,8 @@ do
     echo >> $library.log.txt
 done
 
+# Generates the pileup on the virus genome in order to calculate
+# virus diversity
 for line in $(awk '{printf "%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5}' libraries.txt)
 do
     library=$(echo $line | awk -F: '{print $1}')

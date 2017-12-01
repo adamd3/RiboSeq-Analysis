@@ -1,0 +1,20 @@
+# Directories
+workingdir=$(pwd)
+databasedir="/run/media/katy/EHD/genomes/hg38" # directory containing bowtie databases
+stardbdir="/run/media/katy/EHD/genomes/hg38" # directory containing bowtie databases
+scriptsdir="/mnt/data6A/pipelines/adam_riboseq/RiboSeq-Analysis/Scripts" # directory containing analysis scripts (python scripts, etc.)
+plotsdir="/mnt/data6A/pipelines/adam_riboseq/RiboSeq-Analysis/Plots" # directory containing plot scripts (R scripts)
+
+# Database names
+databases1="rRNA:rRNA/bowtie1/rRNA"
+databases2="mRNA:mRNA/bowtie1/mRNA ncRNA2:ncRNA/bowtie1/ncRNA gDNA:gDNA/bowtie1/gDNA"
+
+# colours used for R plots:
+dbdatacol1="rRNA:616 vRNA:552 mRNA:494 ncRNA_other:78"
+#blue, red, light green, brown
+dbdatacol2="gDNA:142"
+#yellow
+
+# Adaptor sequence to be trimmed from reads + min length of trimmed reads
+adaptor="TGGAATTCTCGGGTGCCAAGGAACTCCAGTCA"
+trimlen=25

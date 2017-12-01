@@ -215,45 +215,7 @@ do
     --genomeDir $stardbdir/$hostname
 done
 
-# map all the reads to the virus with STAR
 
-for line in $(awk '{printf "%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5}' libraries.txt)
-do
-    library=$(echo $line | awk -F: '{print $1}')
-    virus=$(echo $line | awk -F: '{print $2}')
-    hostname=$(echo $line | awk -F: '{print $3}')
-    condition=$(echo $line | awk -F: '{print $4}')
-    libtype=$(echo $line | awk -F: '{print $5}')
-    STAR --runMode alignReads \
-    --runThreadN 8  --outFileNamePrefix $library_allreadsVirus. --outSAMtype BAM SortedByCoordinate \
-    --outBAMsortingThreadN 8 --outReadsUnmapped Fastx \
-    --outFilterMismatchNmax 2  \
-    --outMultimapperOrder Random --outSAMmultNmax 1 --genomeLoad LoadAndKeep \
-    --limitBAMsortRAM 60000000000 \
-    --readFilesIn $library.trimmed.tagclip.fq \
-    --genomeDir $stardbdir/$virus
-done
-
-
-# map all the reads to the host with STAR
-
-for line in $(awk '{printf "%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5}' libraries.txt)
-do
-    library=$(echo $line | awk -F: '{print $1}')
-    virus=$(echo $line | awk -F: '{print $2}')
-    hostname=$(echo $line | awk -F: '{print $3}')
-    condition=$(echo $line | awk -F: '{print $4}')
-    libtype=$(echo $line | awk -F: '{print $5}')
-    STAR --runMode alignReads \
-    --runThreadN 8  --outFileNamePrefix $library_allReadsHost. --outSAMtype BAM SortedByCoordinate \
-    --outBAMsortingThreadN 8 --outReadsUnmapped Fastx \
-    --outFilterMismatchNmax 2  \
-    --outFilterIntronMotifs RemoveNoncanonicalUnannotated \
-    --outMultimapperOrder Random --outSAMmultNmax 1 --genomeLoad LoadAndKeep \
-    --limitBAMsortRAM 60000000000 \
-    --readFilesIn $library.trimmed.tagclip.fq \
-    --genomeDir $stardbdir/$hostname
-done
 
 #------------------------------------------------------------------------------
 

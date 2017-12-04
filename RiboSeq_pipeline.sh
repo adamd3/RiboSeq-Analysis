@@ -151,7 +151,9 @@ do
         | samtools view -q 4 -F 4 -b -h - | samtools sort - > $library.vRNA.bam 2>> $library.log.txt
     echo >> $library.log.txt; \
 	samtools mpileup -aa --fasta-ref $databasedir/$virus/$virus.fna $library.vRNA.bam > $library.pileup.tsv;
+    Rscript $plotdir/variants.R $library.pileup.tsv $databasedir/$virus/$virus.gtf;
 done
+
 
 #-----------------------------------------------------------------------
 

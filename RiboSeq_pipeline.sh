@@ -58,7 +58,7 @@ do
   for dbline in $(echo $databases1 $databases2)
   do
     dbbowtie=$(echo $dbline | awk -F: '{print $2}')
-    dbdir=$(ls $databasedir/$host/$dbbowtie.*ebwt | wc -l | awk '{print $1}')
+    dbdir=$(ls $databasedir/$host/$dbbowtie/$dbbowtie.*ebwt | wc -l | awk '{print $1}')
     if [ -z $dbdir ]; then
       echo "Can't find bowtie database $databasedir/$host/$dbbowtie"
     fi
@@ -86,7 +86,7 @@ if [ $dedup == 1 ]; then
        library=$(echo $line | awk -F: '{print $1}');
        cat $library.trimmed.fq | paste - - - -  | awk -F "\t" '!_[$2]++' | tr '\t' '\n' > $library.uniq.fq;
        awk 'NR % 4 == 2' $library.trimmed.fq | sort | uniq -c | sort -n -r > $library.dupcounts.tsv;
-       awk '{print $1}' $library.dupcounts.tsv | sort | uniq -c > $library.totaldups.tsv;
+       awk '{print $1}' $library.dupcounts.tsv | sort -n -r | uniq -c > $library.totaldups.tsv;
        Rscript $plotdir/plotDuplicates.R $library.totaldups.tsv $library.duplicates.jpg;
        awk '{x=x+$1}; {y=y+1}; END {printf("duplicates\t%s\n", x-y)}' $library.dupcounts.tsv >> $library.log.txt;
        seqtk trimfq -b $nclip -e $nclip $library.uniq.fq > $library.tagclip.fq;
